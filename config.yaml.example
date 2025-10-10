@@ -1,0 +1,17 @@
+# Database configuration
+database:
+  path: "./nabd.db"
+
+# Docker configuration
+docker:
+  host: "unix:///var/run/docker.sock"
+
+# Authentication
+auth:
+  admin_token: "nabd-admin-token"
+
+# Alert thresholds
+alerts:
+  cpu_threshold: 90.0      # CPU percentage threshold
+  memory_threshold: 90.0   # Memory percentage threshold
+  restart_limit: 3         # Maximum restarts before alerting
