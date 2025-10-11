@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -10,6 +11,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedContainer, setSelectedContainer] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -21,52 +24,92 @@ function App() {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
+    // Redirect to dashboard after login
+    navigate('/dashboard');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('nabd_token');
     setIsAuthenticated(false);
+    navigate('/login');
   };
 
   const handleViewLogs = (containerName) => {
     setSelectedContainer(containerName);
     setActiveTab('logs');
+    navigate('/logs');
   };
 
   const handleBackToDashboard = () => {
     setSelectedContainer(null);
     setActiveTab('dashboard');
+    navigate('/dashboard');
   };
 
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard onViewLogs={handleViewLogs} />;
-      case 'logs':
-        return (
-          <Logs 
-            selectedContainer={selectedContainer} 
-            onClose={selectedContainer ? handleBackToDashboard : null}
-          />
-        );
-      case 'autoheal':
-        return <AutoHeal />;
-      default:
-        return <Dashboard onViewLogs={handleViewLogs} />;
+  // Protected Route component
+  const ProtectedRoute = ({ children }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
     }
+    return children;
+  };
+
+  // Login Route component that redirects if already authenticated
+  const LoginRoute = () => {
+    if (isAuthenticated) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return <Login onLogin={handleLogin} />;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      <Layout>
-        {renderContent()}
-      </Layout>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginRoute />} />
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <Header activeTab="dashboard" setActiveTab={setActiveTab} onLogout={handleLogout} />
+              <Layout>
+                <Dashboard onViewLogs={handleViewLogs} />
+              </Layout>
+            </div>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/logs" 
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <Header activeTab="logs" setActiveTab={setActiveTab} onLogout={handleLogout} />
+              <Layout>
+                <Logs 
+                  selectedContainer={selectedContainer} 
+                  onClose={selectedContainer ? handleBackToDashboard : null}
+                />
+              </Layout>
+            </div>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/autoheal" 
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <Header activeTab="autoheal" setActiveTab={setActiveTab} onLogout={handleLogout} />
+              <Layout>
+                <AutoHeal />
+              </Layout>
+            </div>
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 

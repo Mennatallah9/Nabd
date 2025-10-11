@@ -32,7 +32,7 @@ const Login = ({ onLogin }) => {
             <img 
               src="/nabd-logo.png" 
               alt="Nabd Logo" 
-              className="h-16 w-auto"
+              className="h-24 w-auto"
             />
           </div>
           <h2 className="mt-6 text-center text-4xl text-text-primary">

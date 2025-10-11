@@ -18,12 +18,17 @@ const Dashboard = ({ onViewLogs }) => {
         alertAPI.getAlerts(),
       ]);
 
-      setContainers(containersRes.data.data);
-      setMetrics(metricsRes.data.data);
-      setAlerts(alertsRes.data.data);
+      setContainers(containersRes.data.data || []);
+      setMetrics(metricsRes.data.data || []);
+      setAlerts(alertsRes.data.data || []);
       setError('');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch data');
+      // Keep existing data if fetch fails, don't reset to null
+      // If we don't have data yet, initialize with empty arrays
+      setContainers(prev => prev || []);
+      setMetrics(prev => prev || []);
+      setAlerts(prev => prev || []);
     } finally {
       setLoading(false);
     }
@@ -46,7 +51,7 @@ const Dashboard = ({ onViewLogs }) => {
   };
 
   const getMetricForContainer = (containerName) => {
-    return metrics.find(m => m.name === containerName);
+    return metrics ? metrics.find(m => m.name === containerName) : null;
   };
 
   if (loading) {
@@ -75,7 +80,7 @@ const Dashboard = ({ onViewLogs }) => {
       )}
 
       {/* Alerts Section */}
-      {alerts.length > 0 && (
+      {alerts && alerts.length > 0 && (
         <div className="mb-8">
           <h2 className="text-2xl text-text-primary mb-4">
             Active Alerts
@@ -104,7 +109,7 @@ const Dashboard = ({ onViewLogs }) => {
                 Total Containers
               </p>
               <p className="text-3xl text-text-primary">
-                {containers.length}
+                {containers ? containers.length : 0}
               </p>
             </div>
           </div>
@@ -124,7 +129,7 @@ const Dashboard = ({ onViewLogs }) => {
                 Running
               </p>
               <p className="text-3xl text-green-400">
-                {containers.filter(c => c.state === 'running').length}
+                {containers ? containers.filter(c => c.state === 'running').length : 0}
               </p>
             </div>
           </div>
@@ -144,7 +149,7 @@ const Dashboard = ({ onViewLogs }) => {
                 Stopped
               </p>
               <p className="text-3xl text-red-400">
-                {containers.filter(c => c.state === 'exited').length}
+                {containers ? containers.filter(c => c.state === 'exited').length : 0}
               </p>
             </div>
           </div>
@@ -164,7 +169,7 @@ const Dashboard = ({ onViewLogs }) => {
                 Active Alerts
               </p>
               <p className="text-3xl text-yellow-400">
-                {alerts.length}
+                {alerts ? alerts.length : 0}
               </p>
             </div>
           </div>
@@ -173,7 +178,7 @@ const Dashboard = ({ onViewLogs }) => {
 
       {/* Containers Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-        {containers.map((container) => (
+        {containers && containers.map((container) => (
           <ContainerCard
             key={container.id}
             container={container}
@@ -184,7 +189,7 @@ const Dashboard = ({ onViewLogs }) => {
         ))}
       </div>
 
-      {containers.length === 0 && (
+      {(!containers || containers.length === 0) && !loading && (
         <div className="text-center py-16">
           <h3 className="mt-2 text-xl text-text-primary">
             No containers found

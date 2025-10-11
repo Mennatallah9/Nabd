@@ -3,9 +3,12 @@ import { autoHealAPI } from '../services/api';
 
 const AutoHeal = () => {
   const [events, setEvents] = useState([]);
+  const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingContainers, setLoadingContainers] = useState(true);
   const [error, setError] = useState('');
   const [triggering, setTriggering] = useState(false);
+  const [activeTab, setActiveTab] = useState('events');
 
   const fetchEvents = async () => {
     try {
@@ -19,9 +22,25 @@ const AutoHeal = () => {
     }
   };
 
+  const fetchContainers = async () => {
+    try {
+      const response = await autoHealAPI.getContainersWithConfig();
+      setContainers(response.data.data);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to fetch containers');
+    } finally {
+      setLoadingContainers(false);
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
-    const interval = setInterval(fetchEvents, 30000); // Refresh every 30 seconds
+    fetchContainers();
+    const interval = setInterval(() => {
+      fetchEvents();
+      fetchContainers();
+    }, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -35,6 +54,15 @@ const AutoHeal = () => {
       setError(err.response?.data?.error || 'Failed to trigger auto-heal');
     } finally {
       setTriggering(false);
+    }
+  };
+
+  const handleToggleContainer = async (containerId, currentEnabled) => {
+    try {
+      await autoHealAPI.updateContainerConfig(containerId, !currentEnabled);
+      await fetchContainers(); // Refresh the container list
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update container configuration');
     }
   };
 
