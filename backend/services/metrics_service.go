@@ -27,6 +27,17 @@ func (ms *MetricsService) CollectAndStoreMetrics() error {
 		return err
 	}
 
+	// Get list of current container IDs for cleanup
+	currentContainerIDs := make(map[string]bool)
+	for _, metric := range metrics {
+		currentContainerIDs[metric.ContainerID] = true
+	}
+
+	// Deactivate alerts for containers that no longer exist
+	if err := ms.deactivateAlertsForMissingContainers(currentContainerIDs); err != nil {
+		log.Printf("Error deactivating alerts for missing containers: %v", err)
+	}
+
 	for _, metric := range metrics {
 		if err := ms.storeMetric(metric); err != nil {
 			log.Printf("Error storing metric for container %s: %v", metric.Name, err)
@@ -141,7 +152,7 @@ func (ms *MetricsService) GetMetricsHistory(containerID string, hours int) ([]mo
 	return metrics, nil
 }
 
-// checkAlerts checks if metrics trigger any alerts
+// checkAlerts checks if metrics trigger any alerts and deactivates resolved alerts
 func (ms *MetricsService) checkAlerts(metric models.ContainerMetric) error {
 	// Check CPU alert
 	if metric.CPUPercent > ms.config.Alerts.CPUThreshold {
@@ -155,6 +166,11 @@ func (ms *MetricsService) checkAlerts(metric models.ContainerMetric) error {
 			Timestamp:   time.Now(),
 		}
 		if err := ms.storeAlert(alert); err != nil {
+			return err
+		}
+	} else {
+		// Deactivate CPU alerts that are no longer valid
+		if err := ms.deactivateAlert(metric.ContainerID, "high_cpu"); err != nil {
 			return err
 		}
 	}
@@ -173,6 +189,11 @@ func (ms *MetricsService) checkAlerts(metric models.ContainerMetric) error {
 				Timestamp:   time.Now(),
 			}
 			if err := ms.storeAlert(alert); err != nil {
+				return err
+			}
+		} else {
+			// Deactivate memory alerts that are no longer valid
+			if err := ms.deactivateAlert(metric.ContainerID, "high_memory"); err != nil {
 				return err
 			}
 		}
@@ -249,4 +270,46 @@ func (ms *MetricsService) GetActiveAlerts() ([]models.Alert, error) {
 	}
 
 	return alerts, nil
+}
+
+// deactivateAlert deactivates alerts of a specific type for a container
+func (ms *MetricsService) deactivateAlert(containerID, alertType string) error {
+	query := `UPDATE alerts 
+		SET active = 0 
+		WHERE container_id = ? AND type = ? AND active = 1`
+
+	_, err := models.DB.Exec(query, containerID, alertType)
+	return err
+}
+
+// deactivateAlertsForMissingContainers deactivates all alerts for containers that no longer exist
+func (ms *MetricsService) deactivateAlertsForMissingContainers(currentContainerIDs map[string]bool) error {
+	// Get all active alerts
+	query := `SELECT DISTINCT container_id FROM alerts WHERE active = 1`
+	rows, err := models.DB.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var alertContainerIDs []string
+	for rows.Next() {
+		var containerID string
+		if err := rows.Scan(&containerID); err != nil {
+			return err
+		}
+		alertContainerIDs = append(alertContainerIDs, containerID)
+	}
+
+	// Deactivate alerts for containers that no longer exist
+	for _, containerID := range alertContainerIDs {
+		if !currentContainerIDs[containerID] {
+			updateQuery := `UPDATE alerts SET active = 0 WHERE container_id = ? AND active = 1`
+			if _, err := models.DB.Exec(updateQuery, containerID); err != nil {
+				log.Printf("Error deactivating alerts for missing container %s: %v", containerID, err)
+			}
+		}
+	}
+
+	return nil
 }
