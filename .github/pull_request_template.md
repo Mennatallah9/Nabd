@@ -1,10 +1,10 @@
 ## Pull Request Description
 
-Please provide a clear and concise description of the changes in this pull request.
+<!-- Please provide a clear and concise description of the changes in this pull request. -->
 
 ## Type of Change
 
-Please delete options that are not relevant:
+<!-- Please delete options that are not relevant: -->
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
@@ -17,15 +17,13 @@ Please delete options that are not relevant:
 
 ## Related Issues
 
-Please link any related issues:
+<!-- Please link any related issues: -->
 
-Fixes #(issue number)
 Closes #(issue number)
-Related to #(issue number)
 
 ## Changes Made
 
-Please provide a detailed list of changes:
+<!-- Please provide a detailed list of changes: -->
 
 - 
 - 
@@ -33,7 +31,7 @@ Please provide a detailed list of changes:
 
 ## Testing
 
-Please describe the tests that you ran to verify your changes:
+<!-- Please describe the tests that you ran to verify your changes: -->
 
 - [ ] Unit tests pass
 - [ ] Integration tests pass
@@ -43,20 +41,14 @@ Please describe the tests that you ran to verify your changes:
 - [ ] Tested alert system
 - [ ] Tested dashboard UI
 
-### Test Configuration
-
-- **Operating System:** 
-- **Docker Version:** 
-- **Go Version:** 
-- **Node.js Version:** 
 
 ## Screenshots (if applicable)
 
-Please add screenshots to help explain your changes, especially for UI modifications.
+<!-- Please add screenshots to help explain your changes, especially for UI modifications. -->
 
 ## Checklist
 
-Please ensure all of the following are complete:
+<!-- Please ensure all of the following are complete: -->
 
 - [ ] My code follows the project's coding standards
 - [ ] I have performed a self-review of my own code
@@ -67,39 +59,7 @@ Please ensure all of the following are complete:
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] Any dependent changes have been merged and published
 
-## Backend Checklist (if applicable)
-
-- [ ] Added appropriate error handling
-- [ ] Updated API documentation
-- [ ] Added logging where appropriate
-- [ ] Followed Go coding conventions
-- [ ] Added database migrations if needed
-- [ ] Updated configuration examples
-
-## Frontend Checklist (if applicable)
-
-- [ ] Components are responsive
-- [ ] Added proper error handling
-- [ ] Followed React best practices
-- [ ] Updated component documentation
-- [ ] Tested in dark mode
-- [ ] Accessibility considerations addressed
-
-## Documentation
-
-- [ ] README updated (if needed)
-- [ ] API documentation updated (if needed)
-- [ ] Configuration documentation updated (if needed)
-- [ ] Comments added to code where necessary
-
-## Breaking Changes
-
-If this PR introduces breaking changes, please describe them here and update the CHANGELOG:
 
 ## Additional Notes
 
-Please add any additional information that reviewers should know:
-
-## Reviewer Notes
-
-Leave this section for the reviewers to fill out during the review process.
+<!-- Please add any additional information that reviewers should know: -->
