@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  nabd:
+    build: .
+    container_name: nabd
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nabd_data:/data
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - NABD_ADMIN_TOKEN=${NABD_ADMIN_TOKEN:-nabd-admin-token}
+      - NABD_DB_PATH=/data/nabd.db
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    restart: unless-stopped
+    depends_on: []
+    networks:
+      - nabd_network
+
+  # Example monitored container (nginx)
+  nginx-demo:
+    image: nginx:alpine
+    container_name: nginx-demo
+    ports:
+      - "8081:80"
+    networks:
+      - nabd_network
+    restart: unless-stopped
+
+volumes:
+  nabd_data:
+    driver: local
+
+networks:
+  nabd_network:
+    driver: bridge
