@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ContainerCard = ({ container, metric, onRestart, onViewLogs }) => {
+const ContainerCard = ({ container, metric, onRestart, onViewLogs, onViewCharts }) => {
   const getStatusColor = (status) => {
     if (status.includes('Up')) return 'text-green-400';
     if (status.includes('Exited')) return 'text-red-400';
@@ -46,16 +46,22 @@ const ContainerCard = ({ container, metric, onRestart, onViewLogs }) => {
             {truncateImageName(container.image)}
           </p>
         </div>
-        <div className="flex space-x-3 flex-shrink-0">
+        <div className="flex space-x-2 flex-shrink-0">
+          <button
+            onClick={() => onViewCharts(container.name)}
+            className="px-3 py-2 bg-purple-500 bg-opacity-20 text-purple-200 border border-purple-400 border-opacity-50 rounded-lg text-sm hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+          >
+            Charts
+          </button>
           <button
             onClick={() => onViewLogs(container.name)}
-            className="px-4 py-2 bg-blue-500 bg-opacity-20 text-blue-200 border border-blue-400 border-opacity-50 rounded-lg text-base hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+            className="px-3 py-2 bg-blue-500 bg-opacity-20 text-blue-200 border border-blue-400 border-opacity-50 rounded-lg text-sm hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
           >
             Logs
           </button>
           <button
             onClick={() => onRestart(container.name)}
-            className="px-4 py-2 bg-green-500 bg-opacity-20 text-green-200 border border-green-400 border-opacity-50 rounded-lg text-base hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
+            className="px-3 py-2 bg-green-500 bg-opacity-20 text-green-200 border border-green-400 border-opacity-50 rounded-lg text-sm hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm"
           >
             Restart
           </button>

@@ -48,3 +48,31 @@ h1, h2, h3, h4, h5, h6 {
 p, span, div {
   color: #d9d9d9;
 }
+
+/* Loading animation */
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(3);
+  display: inline-block;
+}
+
+.loading-small {
+  position: relative;
+  display: inline-block;
+  transform: scale(1);
+}
+
+@keyframes dash {
+  62% {
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.loading-front {
+  animation: dash 1s linear infinite;
+}

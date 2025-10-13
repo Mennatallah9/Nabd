@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { containerAPI, alertAPI } from '../services/api';
 import ContainerCard from '../components/ContainerCard';
 import Alert from '../components/Alert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-const Dashboard = ({ onViewLogs }) => {
+const Dashboard = ({ onViewLogs, onViewCharts }) => {
   const [containers, setContainers] = useState([]);
   const [metrics, setMetrics] = useState([]);
   const [alerts, setAlerts] = useState([]);
@@ -56,8 +57,8 @@ const Dashboard = ({ onViewLogs }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-text-secondary text-lg">Loading dashboard...</div>
+      <div className="flex items-center justify-center h-64 relative">
+        <LoadingSpinner />
       </div>
     );
   }
@@ -185,6 +186,7 @@ const Dashboard = ({ onViewLogs }) => {
             metric={getMetricForContainer(container.name)}
             onRestart={handleRestart}
             onViewLogs={onViewLogs}
+            onViewCharts={onViewCharts}
           />
         ))}
       </div>

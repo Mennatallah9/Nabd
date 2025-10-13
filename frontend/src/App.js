@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Logs from './pages/Logs';
+import Charts from './pages/Charts';
 import AutoHeal from './pages/AutoHeal';
 import Login from './pages/Login';
 
@@ -40,6 +41,11 @@ function App() {
     navigate('/logs');
   };
 
+  const handleViewCharts = (containerName) => {
+    setSelectedContainer(containerName);
+    navigate(`/charts/${containerName}`);
+  };
+
   const handleBackToDashboard = () => {
     setSelectedContainer(null);
     setActiveTab('dashboard');
@@ -72,7 +78,7 @@ function App() {
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
               <Header activeTab="dashboard" setActiveTab={setActiveTab} onLogout={handleLogout} />
               <Layout>
-                <Dashboard onViewLogs={handleViewLogs} />
+                <Dashboard onViewLogs={handleViewLogs} onViewCharts={handleViewCharts} />
               </Layout>
             </div>
           </ProtectedRoute>
@@ -89,6 +95,19 @@ function App() {
                   selectedContainer={selectedContainer} 
                   onClose={selectedContainer ? handleBackToDashboard : null}
                 />
+              </Layout>
+            </div>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/charts/:containerName" 
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <Header activeTab="charts" setActiveTab={setActiveTab} onLogout={handleLogout} />
+              <Layout>
+                <Charts />
               </Layout>
             </div>
           </ProtectedRoute>

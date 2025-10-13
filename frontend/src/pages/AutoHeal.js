@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { autoHealAPI } from '../services/api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const AutoHeal = () => {
   const [events, setEvents] = useState([]);
@@ -96,8 +97,8 @@ const AutoHeal = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-text-secondary text-lg">Loading auto-heal events...</div>
+      <div className="flex items-center justify-center h-64 relative">
+        <LoadingSpinner />
       </div>
     );
   }
