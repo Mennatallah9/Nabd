@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	log.Println("Starting Nabd v0.1.0 - Container Observability & Auto-Healing Tool")
+	log.Println("Starting Nabd - Container Observability & Auto-Healing Tool")
 
 	// Load configuration
 	config, err := utils.LoadConfig()
