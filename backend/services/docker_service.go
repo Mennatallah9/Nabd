@@ -33,7 +33,7 @@ func NewDockerService(config *models.Config) (*DockerService, error) {
 	}, nil
 }
 
-// GetContainers returns a list of all containers
+// GetContainers returns a list of all containers (excluding those in the exclusion list)
 func (ds *DockerService) GetContainers() ([]models.ContainerInfo, error) {
 	containers, err := ds.client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 	if err != nil {
@@ -43,6 +43,20 @@ func (ds *DockerService) GetContainers() ([]models.ContainerInfo, error) {
 	var result []models.ContainerInfo
 	for _, container := range containers {
 		name := strings.TrimPrefix(container.Names[0], "/")
+		
+		// Check if container is in exclusion list
+		excluded := false
+		for _, excludedName := range ds.config.AutoHeal.ExcludeContainers {
+			if name == excludedName {
+				excluded = true
+				break
+			}
+		}
+		
+		if excluded {
+			continue
+		}
+		
 		result = append(result, models.ContainerInfo{
 			ID:      container.ID[:12],
 			Name:    name,
@@ -56,7 +70,7 @@ func (ds *DockerService) GetContainers() ([]models.ContainerInfo, error) {
 	return result, nil
 }
 
-// GetContainerMetrics collects metrics for all running containers
+// GetContainerMetrics collects metrics for all running containers (excluding those in the exclusion list)
 func (ds *DockerService) GetContainerMetrics() ([]models.ContainerMetric, error) {
 	containers, err := ds.client.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
@@ -65,6 +79,21 @@ func (ds *DockerService) GetContainerMetrics() ([]models.ContainerMetric, error)
 
 	var metrics []models.ContainerMetric
 	for _, container := range containers {
+		name := strings.TrimPrefix(container.Names[0], "/")
+		
+		// Check if container is in exclusion list
+		excluded := false
+		for _, excludedName := range ds.config.AutoHeal.ExcludeContainers {
+			if name == excludedName {
+				excluded = true
+				break
+			}
+		}
+		
+		if excluded {
+			continue
+		}
+		
 		metric, err := ds.getContainerMetric(container)
 		if err != nil {
 			log.Printf("Error getting metrics for container %s: %v", container.ID[:12], err)
@@ -215,6 +244,11 @@ func (ds *DockerService) RestartContainer(containerName string) error {
 func (ds *DockerService) CheckUnhealthyContainers() []models.AutoHealEvent {
 	var events []models.AutoHealEvent
 
+	// Check if auto-healing is enabled
+	if !ds.config.AutoHeal.Enabled {
+		return events
+	}
+
 	containers, err := ds.client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 	if err != nil {
 		log.Printf("Error listing containers: %v", err)
@@ -223,6 +257,19 @@ func (ds *DockerService) CheckUnhealthyContainers() []models.AutoHealEvent {
 
 	for _, container := range containers {
 		name := strings.TrimPrefix(container.Names[0], "/")
+		
+		// Check if container is in exclusion list
+		excluded := false
+		for _, excludedName := range ds.config.AutoHeal.ExcludeContainers {
+			if name == excludedName {
+				excluded = true
+				break
+			}
+		}
+		
+		if excluded {
+			continue
+		}
 		
 		// Check if container is exited or unhealthy
 		if container.State == "exited" || strings.Contains(container.Status, "unhealthy") {
