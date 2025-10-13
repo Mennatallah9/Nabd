@@ -42,6 +42,8 @@ func SetupRoutes(
 	router.Static("/static", "./static")
 	router.StaticFile("/", "./static/index.html")
 	router.StaticFile("/favicon.ico", "./static/favicon.ico")
+	router.StaticFile("/Nabd.png", "./static/Nabd.png")
+	router.StaticFile("/nabd-logo.png", "./static/nabd-logo.png")
 	
 	// Serve index.html for all non-API routes (SPA support)
 	router.NoRoute(func(c *gin.Context) {
