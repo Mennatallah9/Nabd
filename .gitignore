@@ -6,9 +6,10 @@
 *.sqlite
 *.sqlite3
 
-# Environment files
+# Environment and Config files
 .env
 .env.local
+config.yaml
 
 # Node modules
 node_modules/
@@ -21,6 +22,7 @@ npm-debug.log*
 # Go specific
 /backend/nabd
 /backend/tmp/
+/backend/nabd.exe
 
 # IDE
 .vscode/
