@@ -3,90 +3,33 @@
 Thank you for your interest in contributing to Nabd! We welcome contributions from the community and are pleased to have you join us.
 
 ## Table of Contents
+- [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
 - [Making Changes](#making-changes)
 - [Pull Request Process](#pull-request-process)
 - [Issue Guidelines](#issue-guidelines)
-- [Coding Standards](#coding-standards)
 - [Testing](#testing)
-- [Documentation](#documentation)
 
-## Getting Started
-
-1. Fork the repository on GitHub
-2. Clone your fork locally
-3. Set up the development environment
-4. Create a new branch for your feature or bugfix
-5. Make your changes
-6. Test your changes thoroughly
-7. Submit a pull request
-
-## Development Setup
-
-### Prerequisites
+## Prerequisites
 
 - Go 1.21 or higher
 - Node.js 18 or higher
 - Docker and Docker Compose
 - Git
 
-### Local Development
+## Getting Started
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Mennatallah9/Nabd.git
-   cd nabd
-   ```
-
-2. **Build the complete application:**
-   
-   **For Linux/macOS:**
-   ```bash
-   ./build.sh
-   ```
-   
-   **For Windows:**
-   ```batch
-   build.bat
-   ```
-   
-   This will automatically:
-   - Install frontend dependencies
-   - Build the React frontend
-   - Download Go dependencies
-   - Build the Go backend
-
-3. **For development with live reload:**
-   
-   **Backend development:**
-   ```bash
-   cd backend
-   go mod download
-   go run main.go
-   ```
-
-   **Frontend development (in a new terminal):**
-   ```bash
-   cd frontend
-   npm install
-   npm start
-   ```
-
-4. **Access the application:**
-   - Backend API: http://localhost:8080
-   - Frontend: http://localhost:3000 (development) or served by backend (production)
-   - Default admin token: `nabd-admin-token`
-
-### Docker Development
-
+1. Fork the repository on GitHub
+2. Clone your fork locally
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
-
-# Build individual images
-docker build -t nabd:dev .
+git clone https://github.com/your-username/Nabd.git
 ```
+3. Set up your development environment by following the [Getting Started](README.md#getting-started) section in the README. This will guide you through installing dependencies, configuring environment variables, and initializing required services to ensure your setup matches the project's requirements.
+4. Create a new branch for your feature or bugfix
+5. Make your changes
+6. Test your changes thoroughly
+7. Submit a pull request
+
 
 ## Making Changes
 
@@ -148,7 +91,7 @@ Before running tests, ensure the application builds correctly:
 
 **Windows:**
 ```batch
-build.bat
+.\build.bat
 ```
 
 This ensures all dependencies are properly installed and the application compiles successfully.
