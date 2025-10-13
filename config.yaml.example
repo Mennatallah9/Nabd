@@ -1,3 +1,6 @@
+# Copy this file to backend/config.yaml and update the values as needed
+
+
 # Database configuration
 database:
   path: "./nabd.db"
@@ -9,6 +12,13 @@ docker:
 # Authentication
 auth:
   admin_token: "nabd-admin-token"
+
+# Auto-healing configuration
+autoheal:
+  enabled: true
+  interval: 30  # seconds
+  exclude_containers:
+    - "nabd"
 
 # Alert thresholds
 alerts:
