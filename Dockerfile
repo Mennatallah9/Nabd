@@ -11,9 +11,20 @@ RUN npm run build
 # Build stage for backend
 FROM golang:1.21-alpine AS backend-builder
 
+# Install build dependencies for CGO
+RUN apk --no-cache add gcc musl-dev
+
+# Set Go proxy and sum database
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
+
 WORKDIR /app/backend
 COPY backend/go.mod backend/go.sum ./
-RUN go mod download
+
+# Download dependencies with retry mechanism
+RUN go mod download || \
+    (sleep 5 && go mod download) || \
+    (sleep 10 && go mod download)
 
 COPY backend/ ./
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o nabd main.go
@@ -30,8 +41,15 @@ WORKDIR /app
 # Copy backend binary
 COPY --from=backend-builder /app/backend/nabd .
 
-# Copy frontend build
-COPY --from=frontend-builder /app/frontend/build ./static
+# Copy frontend build files
+COPY --from=frontend-builder /app/frontend/build ./web
+
+# Create static directory and copy static assets
+RUN mkdir -p ./static && \
+    cp -r ./web/static/* ./static/ && \
+    cp ./web/index.html ./static/ && \
+    cp ./web/*.png ./static/ 2>/dev/null || true && \
+    cp ./web/*.ico ./static/ 2>/dev/null || true
 
 # Create data directory for SQLite
 RUN mkdir -p /data

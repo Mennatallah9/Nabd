@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nabd:
     build: .
@@ -14,6 +12,10 @@ services:
       - NABD_ADMIN_TOKEN=${NABD_ADMIN_TOKEN:-nabd-admin-token}
       - NABD_DB_PATH=/data/nabd.db
       - DOCKER_HOST=unix:///var/run/docker.sock
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
     restart: unless-stopped
     depends_on: []
     networks:
