@@ -23,13 +23,23 @@ func NewAutoHealService(dockerService *DockerService, metricsService *MetricsSer
 
 // StartAutoHealing starts the auto-healing process
 func (ahs *AutoHealService) StartAutoHealing() {
-	ticker := time.NewTicker(30 * time.Second) // Check every 30 seconds
+	if !ahs.config.AutoHeal.Enabled {
+		log.Println("Auto-healing is disabled in configuration")
+		return
+	}
+	
+	interval := time.Duration(ahs.config.AutoHeal.Interval) * time.Second
+	if interval <= 0 {
+		interval = 30 * time.Second // Default to 30 seconds
+	}
+	
+	ticker := time.NewTicker(interval)
 	go func() {
 		for range ticker.C {
 			ahs.PerformAutoHealing()
 		}
 	}()
-	log.Println("Auto-healing service started")
+	log.Printf("Auto-healing service started with %v interval", interval)
 }
 
 // PerformAutoHealing checks for unhealthy containers and heals them

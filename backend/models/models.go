@@ -63,6 +63,11 @@ type Config struct {
 	Auth struct {
 		AdminToken string `yaml:"admin_token"`
 	} `yaml:"auth"`
+	AutoHeal struct {
+		Enabled           bool     `yaml:"enabled"`
+		Interval          int      `yaml:"interval"`
+		ExcludeContainers []string `yaml:"exclude_containers"`
+	} `yaml:"autoheal"`
 	Alerts struct {
 		CPUThreshold    float64 `yaml:"cpu_threshold"`
 		MemoryThreshold float64 `yaml:"memory_threshold"`
