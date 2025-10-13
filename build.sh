@@ -5,7 +5,7 @@
 
 set -e
 
-echo "Building Nabdﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ..."
+echo "Building Nabd..."
 
 # Build frontend
 echo "Building frontend..."
@@ -25,6 +25,3 @@ echo "✅ Build completed successfully!"
 echo ""
 echo "To run locally:"
 echo "  cd backend && ./nabd"
-echo ""
-echo "To run with Docker Compose:"
-echo "  docker-compose up -d"

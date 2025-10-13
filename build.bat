@@ -2,7 +2,7 @@
 REM Nabd Build Script for Windows
 REM This script builds the complete Nabd application
 
-echo Building Nabdﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ...
+echo Building Nabd...
 
 REM Build frontend
 echo Building frontend...
@@ -23,6 +23,3 @@ echo ✅ Build completed successfully!
 echo.
 echo To run locally:
 echo   cd backend ^&^& nabd.exe
-echo.
-echo To run with Docker Compose:
-echo   docker-compose up -d
