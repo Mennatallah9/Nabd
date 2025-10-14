@@ -285,9 +285,9 @@ const Logs = ({ selectedContainer, onClose }) => {
         {onClose && (
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-primary-500 text-white text-lg font-medium rounded-lg hover:bg-primary-600 transition-all duration-200 shadow-lg"
+            className="px-4 py-2 bg-primary-500 bg-opacity-20 text-primary-200 border border-primary-400 border-opacity-50 rounded-lg hover:bg-opacity-30 transition-all duration-200 mb-4"
           >
-            Back to Dashboard
+            ← Back to Dashboard
           </button>
         )}
       </div>
@@ -346,15 +346,6 @@ const Logs = ({ selectedContainer, onClose }) => {
               className="w-full px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
             >
               {summarizing ? 'Summarizing...' : 'Summarise Logs'}
-            </button>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              onClick={checkAISupport}
-              className="w-full px-4 py-3 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all duration-200 shadow-lg"
-            >
-              Debug AI
             </button>
           </div>
 
