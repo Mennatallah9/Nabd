@@ -20,158 +20,131 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Derive tag name
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF##*/}"
+          else
+            TAG_NAME="${{ github.event.inputs.version }}"
+          fi
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Using tag: $TAG_NAME"
+
+      - name: Validate tag format
+        if: startsWith(steps.vars.outputs.tag, 'v') == false
+        run: |
+          echo "Tag must start with 'v' (e.g. v0.1.0). Provided: ${{ steps.vars.outputs.tag }}" >&2
+          exit 1
+
+      - name: Setup environments (Node & Go)
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
+      - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-          cache-dependency-path: backend/go.sum
-
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
 
       - name: Build frontend
         working-directory: ./frontend
-        env:
-          CI: false
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
 
       - name: Build backend binaries
         working-directory: ./backend
         run: |
-          # Build for Linux AMD64 (primary target)
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o nabd-linux-amd64 main.go
-          
-          # Build for Windows AMD64
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o nabd-windows-amd64.exe main.go
-          
-          # Build for macOS AMD64
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o nabd-darwin-amd64 main.go
+          for TARGET in "linux:amd64:nabd-linux-amd64" "windows:amd64:nabd-windows-amd64.exe" "darwin:amd64:nabd-darwin-amd64"; do
+            IFS=':' read -r GOOS GOARCH OUT <<<"$TARGET"
+            echo "Building $OUT ($GOOS/$GOARCH)"
+            GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build -ldflags='-w -s' -o "$OUT" main.go
+          done
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Docker login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=tag
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push Docker image (AMD64 only)
+      - name: Build & push image (linux/amd64)
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:latest
 
       - name: Prepare release assets
         run: |
+          TAG=${{ steps.vars.outputs.tag }}
           mkdir -p release-assets
-          
-          # Copy frontend build
           cp -r frontend/build release-assets/frontend-build
-          
-          # Copy backend binaries
-          cp backend/nabd-linux-amd64 release-assets/
-          cp backend/nabd-windows-amd64.exe release-assets/
-          cp backend/nabd-darwin-amd64 release-assets/
-          
-          # Create archives
-          cd release-assets
-          
-          # Create frontend archive
-          tar -czf nabd-frontend-${GITHUB_REF_NAME}.tar.gz frontend-build/
-          
-          # Create backend archives
-          chmod +x nabd-linux-amd64 nabd-darwin-amd64
-          tar -czf nabd-${GITHUB_REF_NAME}-linux-amd64.tar.gz nabd-linux-amd64
-          zip nabd-${GITHUB_REF_NAME}-windows-amd64.zip nabd-windows-amd64.exe
-          tar -czf nabd-${GITHUB_REF_NAME}-darwin-amd64.tar.gz nabd-darwin-amd64
-          
-          # Create complete bundle
-          mkdir -p nabd-${GITHUB_REF_NAME}
-          cp -r frontend-build nabd-${GITHUB_REF_NAME}/web
-          cp nabd-linux-amd64 nabd-${GITHUB_REF_NAME}/nabd
-          cp ../README.md nabd-${GITHUB_REF_NAME}/
-          cp ../LICENSE nabd-${GITHUB_REF_NAME}/
-          cp ../config.yaml.example nabd-${GITHUB_REF_NAME}/config.yaml
-          tar -czf nabd-${GITHUB_REF_NAME}-complete.tar.gz nabd-${GITHUB_REF_NAME}/
-
-      - name: Generate checksums
-        working-directory: release-assets
-        run: |
+          cp backend/nabd-linux-amd64 backend/nabd-windows-amd64.exe backend/nabd-darwin-amd64 release-assets/
+          pushd release-assets
+          chmod +x nabd-linux-amd64 nabd-darwin-amd64 || true
+          tar -czf nabd-frontend-${TAG}.tar.gz frontend-build/
+          tar -czf nabd-${TAG}-linux-amd64.tar.gz nabd-linux-amd64
+          zip nabd-${TAG}-windows-amd64.zip nabd-windows-amd64.exe
+          tar -czf nabd-${TAG}-darwin-amd64.tar.gz nabd-darwin-amd64
+          mkdir -p nabd-${TAG}
+          cp -r frontend-build nabd-${TAG}/web
+          cp nabd-linux-amd64 nabd-${TAG}/nabd
+          cp ../README.md ../LICENSE ../config.yaml.example nabd-${TAG}/
+          mv nabd-${TAG}/config.yaml.example nabd-${TAG}/config.yaml
+          tar -czf nabd-${TAG}-complete.tar.gz nabd-${TAG}/
           sha256sum *.tar.gz *.zip > checksums.txt
+          popd
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "Nabd ${{ github.ref_name }}"
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: "Nabd ${{ steps.vars.outputs.tag }}"
+          draft: false
+          prerelease: ${{ contains(steps.vars.outputs.tag, '-') }}
+          files: |
+            release-assets/*.tar.gz
+            release-assets/*.zip
+            release-assets/checksums.txt
           body: |
-            ## Nabd ${{ github.ref_name }}
-            
+            ## Nabd ${{ steps.vars.outputs.tag }}
+
             ### Features
             - Real-time Docker container monitoring
             - Auto-healing capabilities for unhealthy containers
             - Beautiful web dashboard with React frontend
             - JWT-based authentication
             - REST API for metrics and container management
-            
+
             ### Installation
-            
+
             #### Docker (Recommended)
             ```bash
             docker run -d --name nabd \
               -p 8080:8080 \
               -v /var/run/docker.sock:/var/run/docker.sock \
               -v nabd-data:/app/data \
-              mennahaggag/nabd:${{ github.ref_name }}
+              mennahaggag/nabd:${{ steps.vars.outputs.tag }}
             ```
-            
+
             #### Binary Installation
             1. Download the appropriate binary for your platform
             2. Extract the archive
             3. Run `./nabd` (Linux/macOS) or `nabd.exe` (Windows)
-            
+
             ### Docker Images
-            - `mennahaggag/nabd:${{ github.ref_name }}`
-            - `mennahaggag/nabd:latest` (for latest release)
-            - Platform support: linux/amd64
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          files: |
-            release-assets/*.tar.gz
-            release-assets/*.zip
-            release-assets/checksums.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - `mennahaggag/nabd:${{ steps.vars.outputs.tag }}`
+            - `mennahaggag/nabd:latest`
 
       - name: Release notification
-        if: success() && startsWith(github.ref, 'refs/tags/')
         run: |
-          echo "✅ Successfully released Nabd ${{ github.ref_name }}"
-          echo "🐳 Docker image available at: mennahaggag/nabd:${{ github.ref_name }}"
-          echo "📦 Release assets available at: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+          echo "✅ Successfully released Nabd ${{ steps.vars.outputs.tag }}"
+          echo "🐳 Docker image: mennahaggag/nabd:${{ steps.vars.outputs.tag }}"
+          echo "📦 Assets: https://github.com/${{ github.repository }}/releases/tag/${{ steps.vars.outputs.tag }}"
