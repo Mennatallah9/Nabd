@@ -12,7 +12,6 @@ type AutoHealService struct {
 	config         *models.Config
 }
 
-// NewAutoHealService creates a new auto-heal service
 func NewAutoHealService(dockerService *DockerService, metricsService *MetricsService, config *models.Config) *AutoHealService {
 	return &AutoHealService{
 		dockerService:  dockerService,
@@ -21,7 +20,6 @@ func NewAutoHealService(dockerService *DockerService, metricsService *MetricsSer
 	}
 }
 
-// StartAutoHealing starts the auto-healing process
 func (ahs *AutoHealService) StartAutoHealing() {
 	if !ahs.config.AutoHeal.Enabled {
 		log.Println("Auto-healing is disabled in configuration")
@@ -30,7 +28,7 @@ func (ahs *AutoHealService) StartAutoHealing() {
 	
 	interval := time.Duration(ahs.config.AutoHeal.Interval) * time.Second
 	if interval <= 0 {
-		interval = 30 * time.Second // Default to 30 seconds
+		interval = 15 * time.Second // Default to 15 seconds
 	}
 	
 	ticker := time.NewTicker(interval)
@@ -42,7 +40,7 @@ func (ahs *AutoHealService) StartAutoHealing() {
 	log.Printf("Auto-healing service started with %v interval", interval)
 }
 
-// PerformAutoHealing checks for unhealthy containers and heals them
+
 func (ahs *AutoHealService) PerformAutoHealing() {
 	events := ahs.dockerService.CheckUnhealthyContainers()
 	
@@ -53,7 +51,7 @@ func (ahs *AutoHealService) PerformAutoHealing() {
 	}
 	
 	if len(events) > 0 {
-		log.Printf("Auto-healing completed: %d actions performed", len(events))
+		log.Printf("Auto-healing completed: %d action(s) performed", len(events))
 	}
 }
 

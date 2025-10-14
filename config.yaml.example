@@ -16,7 +16,7 @@ auth:
 # Auto-healing configuration
 autoheal:
   enabled: true
-  interval: 30  # seconds
+  interval: 15  # seconds
   exclude_containers:
     - "nabd"
 

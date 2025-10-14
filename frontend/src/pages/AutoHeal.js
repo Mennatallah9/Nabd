@@ -4,12 +4,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const AutoHeal = () => {
   const [events, setEvents] = useState([]);
-  const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingContainers, setLoadingContainers] = useState(true);
   const [error, setError] = useState('');
   const [triggering, setTriggering] = useState(false);
-  const [activeTab, setActiveTab] = useState('events');
 
   const fetchEvents = async () => {
     try {
@@ -23,25 +20,11 @@ const AutoHeal = () => {
     }
   };
 
-  const fetchContainers = async () => {
-    try {
-      const response = await autoHealAPI.getContainersWithConfig();
-      setContainers(response.data.data);
-      setError('');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch containers');
-    } finally {
-      setLoadingContainers(false);
-    }
-  };
-
   useEffect(() => {
     fetchEvents();
-    fetchContainers();
     const interval = setInterval(() => {
       fetchEvents();
-      fetchContainers();
-    }, 30000); // Refresh every 30 seconds
+    }, 15000); // Refresh every 15 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -58,14 +41,14 @@ const AutoHeal = () => {
     }
   };
 
-  const handleToggleContainer = async (containerId, currentEnabled) => {
-    try {
-      await autoHealAPI.updateContainerConfig(containerId, !currentEnabled);
-      await fetchContainers(); // Refresh the container list
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update container configuration');
-    }
-  };
+  // const handleToggleContainer = async (containerId, currentEnabled) => {
+  //   try {
+  //     await autoHealAPI.updateContainerConfig(containerId, !currentEnabled);
+  //     await fetchContainers();
+  //   } catch (err) {
+  //     setError(err.response?.data?.error || 'Failed to update container configuration');
+  //   }
+  // };
 
   const getStatusIcon = (success) => {
     return success ? (
@@ -93,6 +76,68 @@ const AutoHeal = () => {
     if (!containerId) return '';
     // Show first 12 characters of container ID (standard Docker short ID length)
     return containerId.substring(0, 12);
+  };
+
+  const cleanReason = (reason) => {
+    if (!reason) return '';
+    
+    //remove common timestamp patterns from the reason
+    return reason
+      .replace(/,\s*Status:\s*.*?(\d+\s*(hours?|minutes?|seconds?|days?)\s*ago)/gi, '')
+      .replace(/,\s*Status:\s*.*?ago/gi, '')
+      .replace(/\(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}.*?\)/g, '')
+      .replace(/\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}[.\d]*[Z]?/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'Unknown';
+    
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      
+      let relativeTime = '';
+      if (diffMinutes < 1) {
+        relativeTime = 'Just now';
+      } else if (diffMinutes < 60) {
+        relativeTime = `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+      } else if (diffHours < 24) {
+        relativeTime = `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+      } else if (diffDays < 7) {
+        relativeTime = `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+      } else {
+        relativeTime = date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+      
+      const fullDateTime = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+      });
+      
+      return { relativeTime, fullDateTime };
+    } catch (error) {
+      console.error('Error formatting timestamp:', timestamp, error);
+      return { relativeTime: 'Invalid date', fullDateTime: 'Invalid date' };
+    }
   };
 
   if (loading) {
@@ -151,7 +196,7 @@ const AutoHeal = () => {
                 <li>Detects stopped or unhealthy containers</li>
                 <li>Automatically restarts failed containers</li>
                 <li>Logs all recovery actions</li>
-                <li>Runs health checks every 30 seconds</li>
+                <li>Runs health checks every 15 seconds</li>
               </ul>
             </div>
           </div>
@@ -186,7 +231,7 @@ const AutoHeal = () => {
                         Container ID: {truncateContainerId(event.container_id)}
                       </p>
                       <p className="text-lg text-text-secondary mt-3">
-                        {event.reason}
+                        {cleanReason(event.reason)}
                       </p>
                     </div>
                   </div>
@@ -194,8 +239,17 @@ const AutoHeal = () => {
                     <p className={`text-lg ${getStatusColor(event.success)}`}>
                       {event.success ? 'Success' : 'Failed'}
                     </p>
-                    <p className="text-sm text-text-secondary mt-1">
-                      {new Date(event.timestamp).toLocaleString()}
+                    <p 
+                      className="text-sm text-text-secondary mt-1" 
+                      title={(() => {
+                        const formatted = formatTimestamp(event.timestamp);
+                        return typeof formatted === 'object' ? formatted.fullDateTime : formatted;
+                      })()}
+                    >
+                      {(() => {
+                        const formatted = formatTimestamp(event.timestamp);
+                        return typeof formatted === 'object' ? formatted.relativeTime : formatted;
+                      })()}
                     </p>
                   </div>
                 </div>

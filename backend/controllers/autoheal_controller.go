@@ -12,14 +12,12 @@ type AutoHealController struct {
 	autoHealService *services.AutoHealService
 }
 
-// NewAutoHealController creates a new auto-heal controller
 func NewAutoHealController(autoHealService *services.AutoHealService) *AutoHealController {
 	return &AutoHealController{
 		autoHealService: autoHealService,
 	}
 }
 
-// GetAutoHealHistory returns auto-heal event history
 func (ahc *AutoHealController) GetAutoHealHistory(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "50")
 	limit, err := strconv.Atoi(limitStr)
@@ -37,7 +35,7 @@ func (ahc *AutoHealController) GetAutoHealHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": events})
 }
 
-// TriggerAutoHeal manually triggers auto-healing check
+//manually triggers auto-healing check
 func (ahc *AutoHealController) TriggerAutoHeal(c *gin.Context) {
 	ahc.autoHealService.PerformAutoHealing()
 	c.JSON(http.StatusOK, gin.H{"message": "Auto-healing check triggered"})
