@@ -23,6 +23,7 @@ npm-debug.log*
 /backend/nabd
 /backend/tmp/
 /backend/nabd.exe
+/backend/static
 
 # IDE
 .vscode/
