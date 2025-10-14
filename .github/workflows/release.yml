@@ -75,18 +75,28 @@ jobs:
           go-version: '1.21'
           cache-dependency-path: backend/go.sum
 
-      - name: Install build dependencies (Linux)
-        if: matrix.goos == 'linux'
+      - name: Install build dependencies (Linux ARM64)
+        if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-multilib gcc-aarch64-linux-gnu
+          sudo apt-get install -y gcc-aarch64-linux-gnu || true
+          # If gcc-aarch64-linux-gnu fails, try alternative installation
+          if ! which aarch64-linux-gnu-gcc > /dev/null 2>&1; then
+            sudo apt-get install -y crossbuild-essential-arm64
+          fi
+
+      - name: Install build dependencies (Linux AMD64)
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib || true
 
       - name: Build backend binary
         working-directory: ./backend
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 1
+          CGO_ENABLED: ${{ matrix.goos == 'linux' && '1' || '0' }}
           CC: ${{ matrix.goarch == 'arm64' && matrix.goos == 'linux' && 'aarch64-linux-gnu-gcc' || 'gcc' }}
         run: |
           go mod download
