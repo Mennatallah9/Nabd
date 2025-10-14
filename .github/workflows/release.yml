@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v0.1.0)'
+        required: true
+        default: 'v0.0.0-test'
 
 env:
   REGISTRY: docker.io
@@ -28,14 +33,20 @@ jobs:
           else
             TAG_NAME="${{ github.event.inputs.version }}"
           fi
+          TAG_NAME="${TAG_NAME//[[:space:]]/}" # strip whitespace
+          echo "Using tag: '$TAG_NAME'"
+          if [[ -z "$TAG_NAME" ]]; then
+            echo "Tag is empty. Provide a version input like v0.1.0" >&2
+            exit 1
+          fi
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "Using tag: $TAG_NAME"
 
       - name: Validate tag format
-        if: startsWith(steps.vars.outputs.tag, 'v') == false
         run: |
-          echo "Tag must start with 'v' (e.g. v0.1.0). Provided: ${{ steps.vars.outputs.tag }}" >&2
-          exit 1
+          TAG='${{ steps.vars.outputs.tag }}'
+          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9._-]+)?$ ]]; then
+            echo "Tag '$TAG' is invalid. Expected pattern vMAJOR.MINOR.PATCH (optionally -prerelease). Examples: v1.2.3, v1.2.3-rc1" >&2
+            exit 1
 
       - name: Setup environments (Node & Go)
         uses: actions/setup-node@v4
@@ -47,6 +58,8 @@ jobs:
 
       - name: Build frontend
         working-directory: ./frontend
+        env:
+          CI: false
         run: |
           npm ci
           npm run build
