@@ -47,6 +47,8 @@ jobs:
           if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9._-]+)?$ ]]; then
             echo "Tag '$TAG' is invalid. Expected pattern vMAJOR.MINOR.PATCH (optionally -prerelease). Examples: v1.2.3, v1.2.3-rc1" >&2
             exit 1
+          fi
+          echo "Tag format OK: $TAG"
 
       - name: Setup environments (Node & Go)
         uses: actions/setup-node@v4
