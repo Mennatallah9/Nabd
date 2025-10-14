@@ -2,10 +2,10 @@ package models
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
-// ContainerMetric represents metrics data for a container
 type ContainerMetric struct {
 	ID          int       `json:"id" db:"id"`
 	ContainerID string    `json:"container_id" db:"container_id"`
@@ -19,7 +19,6 @@ type ContainerMetric struct {
 	Timestamp   time.Time `json:"timestamp" db:"timestamp"`
 }
 
-// AutoHealEvent represents an auto-healing action
 type AutoHealEvent struct {
 	ID          int       `json:"id" db:"id"`
 	ContainerID string    `json:"container_id" db:"container_id"`
@@ -30,7 +29,18 @@ type AutoHealEvent struct {
 	Timestamp   time.Time `json:"timestamp" db:"timestamp"`
 }
 
-// Alert represents an alert condition
+// custom marshaling for AutoHealEvent to ensure proper timestamp format
+func (ahe AutoHealEvent) MarshalJSON() ([]byte, error) {
+	type Alias AutoHealEvent
+	return json.Marshal(&struct {
+		Timestamp string `json:"timestamp"`
+		*Alias
+	}{
+		Timestamp: ahe.Timestamp.Format(time.RFC3339),
+		Alias:     (*Alias)(&ahe),
+	})
+}
+
 type Alert struct {
 	ID          int       `json:"id" db:"id"`
 	ContainerID string    `json:"container_id" db:"container_id"`
@@ -42,7 +52,6 @@ type Alert struct {
 	Timestamp   time.Time `json:"timestamp" db:"timestamp"`
 }
 
-// ContainerInfo represents basic container information
 type ContainerInfo struct {
 	ID      string    `json:"id"`
 	Name    string    `json:"name"`
@@ -52,7 +61,6 @@ type ContainerInfo struct {
 	Created time.Time `json:"created"`
 }
 
-// Config represents the application configuration
 type Config struct {
 	Database struct {
 		Path string `yaml:"path"`
