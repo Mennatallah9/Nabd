@@ -19,6 +19,18 @@ echo "Building backend..."
 cd backend
 go mod download
 CGO_ENABLED=1 go build -o nabd main.go
+
+# Copy frontend build files to backend static directory
+echo "Copying frontend files..."
+if [ -d "static" ]; then
+    rm -rf static
+fi
+mkdir -p static
+cp -r ../frontend/build/static/* static/
+cp ../frontend/build/index.html static/
+cp ../frontend/build/*.png static/ 2>/dev/null || true
+cp ../frontend/build/*.ico static/ 2>/dev/null || true
+
 cd ..
 
 echo "✅ Build completed successfully!"
