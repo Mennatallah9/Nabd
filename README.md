@@ -2,7 +2,7 @@
 <img width="2000" height="500" alt="nabd second" src="https://github.com/user-attachments/assets/158bcfcc-5871-4252-afe5-ab9ea661840a" />
 </p>
 
-<p align="center">Lightweight Open-Source Container Observability & Auto-Healing Tool</p>
+<p align="center">Your Containers’ Pulse</p>
 
 <p align="center">Nabd is a self-contained observability and auto-healing toolkit for Docker containers that combines metrics collection, log monitoring, alerting, and container auto-healing in a single, easy-to-deploy package.</p>
 
@@ -63,7 +63,7 @@ docker run -d \
   -p 8080:8080 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v nabd_data:/data \
-  -e NABD_ADMIN_TOKEN=your-secure-token \
+  -e NABD_ADMIN_TOKEN=nabd-admin-token \
   mennahaggag/nabd:latest
 ```
 then navigate to `http://localhost:8080`
@@ -123,7 +123,7 @@ This option provides:
 ```bash
 POST /api/auth/login
 {
-  "token": "your-admin-token"
+  "token": "nabd-admin-token"
 }
 ```
 
