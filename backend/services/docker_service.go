@@ -283,7 +283,7 @@ func (ds *DockerService) CheckUnhealthyContainers() []models.AutoHealEvent {
 				ContainerID: container.ID[:12],
 				Name:        name,
 				Action:      "restart",
-				Reason:      fmt.Sprintf("Container state: %s, Status: %s", container.State, container.Status),
+				Reason:      fmt.Sprintf("Container state: %s", container.State),
 				Success:     success,
 				Timestamp:   time.Now(),
 			}
