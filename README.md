@@ -2,7 +2,7 @@
 <img width="2000" height="500" alt="nabd second" src="https://github.com/user-attachments/assets/158bcfcc-5871-4252-afe5-ab9ea661840a" />
 </p>
 
-<p align="center">Your Containers’ Pulse</p>
+<p align="center"><em><strong>Your Containers’ Pulse</strong></em></p>
 
 <p align="center">Nabd is a self-contained observability and auto-healing toolkit for Docker containers that combines metrics collection, log monitoring, alerting, and container auto-healing in a single, easy-to-deploy package.</p>
 
@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-18+-blue.svg" alt="React" />
 </div>
 
-> **💡 Fun Fact:** The word “Nabd” (نبض) in Arabic literally means “pulse” or “heartbeat”.
+> **💡 Why "Nabd"?** The word “Nabd” (نبض) in Arabic literally means “pulse” or “heartbeat”.
 
 
 ## Features
