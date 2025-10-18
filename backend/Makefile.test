@@ -1,0 +1,71 @@
+# Nabd Backend Testing
+
+.PHONY: test test-verbose test-coverage test-clean help
+
+# Default target
+all: test
+
+# Run all tests
+test:
+	@echo "Running all tests..."
+	go test ./tests/...
+
+# Run tests with verbose output
+test-verbose:
+	@echo "Running tests with verbose output..."
+	go test -v ./tests/...
+
+# Run tests with coverage
+test-coverage:
+	@echo "Running tests with coverage..."
+	go test -v -race -coverprofile=coverage.out ./tests/...
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+# Run tests with coverage and display summary
+test-coverage-summary: test-coverage
+	@echo "Coverage summary:"
+	go tool cover -func=coverage.out
+
+# Run specific test
+test-single:
+	@echo "Usage: make test-single TEST=TestName"
+	@if [ "$(TEST)" != "" ]; then \
+		go test -v -run $(TEST) ./tests/...; \
+	fi
+
+# Run tests for specific package
+test-package:
+	@echo "Usage: make test-package PKG=package_name"
+	@if [ "$(PKG)" != "" ]; then \
+		go test -v ./tests/$(PKG)/...; \
+	fi
+
+# Clean test artifacts
+test-clean:
+	@echo "Cleaning test artifacts..."
+	rm -f coverage.out coverage.html
+
+# Install test dependencies
+test-deps:
+	@echo "Installing test dependencies..."
+	go mod tidy
+
+# Run tests in watch mode (requires entr)
+test-watch:
+	@echo "Running tests in watch mode..."
+	find . -name "*.go" | entr -c make test
+
+# Help
+help:
+	@echo "Available targets:"
+	@echo "  test                 - Run all tests"
+	@echo "  test-verbose         - Run tests with verbose output"
+	@echo "  test-coverage        - Run tests with coverage report"
+	@echo "  test-coverage-summary - Run tests with coverage summary"
+	@echo "  test-single TEST=name - Run specific test"
+	@echo "  test-package PKG=name - Run tests for specific package"
+	@echo "  test-clean           - Clean test artifacts"
+	@echo "  test-deps            - Install test dependencies"
+	@echo "  test-watch           - Run tests in watch mode"
+	@echo "  help                 - Show this help"
