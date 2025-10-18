@@ -142,10 +142,12 @@ jobs:
 
             #### Docker (Recommended)
             ```bash
-            docker run -d --name nabd \
+            docker run -d \
+              --name nabd \
               -p 8080:8080 \
               -v /var/run/docker.sock:/var/run/docker.sock \
               -v nabd-data:/app/data \
+              -e NABD_ADMIN_TOKEN=nabd-admin-token \
               mennahaggag/nabd:${{ steps.vars.outputs.tag }}
             ```
 
