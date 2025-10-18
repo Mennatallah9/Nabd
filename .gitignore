@@ -24,6 +24,8 @@ npm-debug.log*
 /backend/tmp/
 /backend/nabd.exe
 /backend/static
+/backend/tests/TEST_SUMMARY.md
+/backend/coverage*
 
 # IDE
 .vscode/
