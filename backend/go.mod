@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/docker/docker v20.10.24+incompatible
 	github.com/gin-gonic/gin v1.9.1
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.29.5
