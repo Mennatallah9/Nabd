@@ -13,6 +13,18 @@
   <img src="https://img.shields.io/badge/React-18+-blue.svg" alt="React" />
 </div>
 
+## Demo Video
+
+<p align="center">
+  <a href="https://youtu.be/ts6PgilVzBI" target="_blank">
+    <img src="https://img.youtube.com/vi/ts6PgilVzBI/maxresdefault.jpg" alt="Nabd Demo Video" width="800">
+  </a>
+</p>
+
+<p align="center">
+  <em>▶️ Watch the full demo on YouTube <a href="https://youtu.be/ts6PgilVzBI"></a></em>
+</p>
+
 > **💡 Why "Nabd"?** The word “Nabd” (نبض) in Arabic literally means “pulse” or “heartbeat”.
 
 
@@ -215,7 +227,3 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Star History
 
 If you find Nabd useful, please consider giving it a star on GitHub!
-
----
-
-**Made with ❤️ by the Nabd Team**
