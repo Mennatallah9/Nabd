@@ -7,7 +7,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - nabd_data:/data
-      - ./config.yaml:/app/config.yaml:ro
+      - ./config.yaml:/app/backend/config.yaml:ro
     environment:
       - NABD_ADMIN_TOKEN=${NABD_ADMIN_TOKEN:-nabd-admin-token}
       - NABD_DB_PATH=/data/nabd.db

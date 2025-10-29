@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Build stage for backend
-FROM golang:1.21-alpine AS backend-builder
+FROM golang:1.23-alpine AS backend-builder
 
 # Install build dependencies for CGO
 RUN apk --no-cache add gcc musl-dev
