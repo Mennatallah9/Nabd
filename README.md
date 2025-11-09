@@ -9,7 +9,7 @@
 <div align="center">
   <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License" />
   <img src="https://img.shields.io/badge/version-v0.1.0-green.svg" alt="Version" />
-  <img src="https://img.shields.io/badge/Go-1.21+-blue.svg" alt="Go" />
+  <img src="https://img.shields.io/badge/Go-1.23+-blue.svg" alt="Go" />
   <img src="https://img.shields.io/badge/React-18+-blue.svg" alt="React" />
 </div>
 
@@ -85,7 +85,7 @@ For a more customizable Docker deployment with persistent configuration:
 
 3. Copy and customize the configuration:
    ```bash
-   cp config.yaml.example config.yaml
+   cp config.yaml.example backend/config.yaml
    ```
 
 4. Deploy with Docker Compose:
@@ -165,7 +165,7 @@ GET /api/alerts              # Get active alerts
 ```
 
 **Tech Stack:**
-- **Backend:** Go 1.21+ (Gin framework)
+- **Backend:** Go 1.23+ (Gin framework)
 - **Frontend:** React 18 + TailwindCSS
 - **Database:** SQLite (embedded)
 - **Container:** Docker SDK for Go
